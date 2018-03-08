@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload</title>
+</head>
+<body>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+        }
+
+        a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .previous {
+            background-color: #f1f1f1;
+            color: black;
+        }
+
+        .next {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<a href="#" class="previous round">&#8249;</a>
+<a href="#" class="next round">&#8250;</a>
+
+<h1>Your Pictures:</h1>
+{{range .}}
+<img src="/pics/{{.}}" width="500px"><br>
+{{sp .}}<br>
+<form method="post">
+    <h4>Delete It!</h4>
+    <input type="text" name="File" placeholder=""><br>
+    <button type="submit">Delete</button><br>
+    <br>
+</form>
+<br>
+{{end}}
+</body>
+</html>
