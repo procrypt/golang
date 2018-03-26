@@ -1,16 +1,18 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
-	"fmt"
-	"strconv"
 )
 
 type Dapp struct {
 }
 
-func(d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
+func (d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	fmt.Println("Init Function")
 	var a string
 	var value int
@@ -18,7 +20,7 @@ func(d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	args := stub.GetStringArgs()
 	if len(args) != 2 {
 		return shim.Error("Need at least two arguments")
-		}
+	}
 	a = args[0]
 	value, _ = strconv.Atoi(args[1])
 
@@ -32,7 +34,7 @@ func(d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	return shim.Success(nil)
 }
 
-func(d *Dapp) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+func (d *Dapp) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	fn, args := stub.GetFunctionAndParameters()
 	fmt.Println("Invoke Function", fn)
 
@@ -43,7 +45,7 @@ func(d *Dapp) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		result, err = set(stub, args)
 	} else {
 		result, err = get(stub, args)
-		}
+	}
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -59,7 +61,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	var value int
 
 	a = args[0]
-	value,_ = strconv.Atoi(args[1])
+	value, _ = strconv.Atoi(args[1])
 
 	err := stub.PutState(args[0], []byte(args[1]))
 	if err != nil {
@@ -93,7 +95,8 @@ func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 }
 
 func main() {
-	if err :=  shim.Start(new(Dapp)); err != nil {
+	if err := shim.Start(new(Dapp)); err != nil {
 		fmt.Println("Error starting Dapp.")
+		os.Exit(1)
 	}
 }
