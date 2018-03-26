@@ -16,6 +16,7 @@ func (d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	fmt.Println("Init Function")
 	var a string
 	var value int
+	var er error
 
 	args := stub.GetStringArgs()
 	if len(args) != 2 {
