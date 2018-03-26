@@ -22,8 +22,10 @@ func (d *Dapp) Init(stub shim.ChaincodeStubInterface) peer.Response {
 		return shim.Error("Need at least two arguments")
 	}
 	a = args[0]
-	value, _ = strconv.Atoi(args[1])
-
+	value, er = strconv.Atoi(args[1])
+	if er != nil {
+		return shim.Error(fmt.Sprintf("error converting ascii to int,%s", er))
+	}
 	err := stub.PutState(args[0], []byte(args[1]))
 	if err != nil {
 		return shim.Error("Failed to put state into the ledger")
