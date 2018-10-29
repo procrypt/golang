@@ -11,9 +11,14 @@ func main() {
 	fmt.Println("about to exit")
 }
 
+func receive(c <-chan int) {
+	for v := range c {
+		fmt.Println(v)
+	}
+}
+
 func gen() <-chan int {
 	c := make(chan int)
-
 	go func() {
 		for i := 0; i < 100; i++ {
 			c <- i
@@ -21,10 +26,4 @@ func gen() <-chan int {
 		close(c)
 	}()
 	return c
-}
-
-func receive(sender <-chan int) {
-	for elem := range sender {
-		fmt.Println(elem)
-	}
 }
