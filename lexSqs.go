@@ -37,6 +37,7 @@ func SQS(msg []string)  {
 		QueueUrl: &qURL,
 
 	})
+	data = []string{}
 }
 
 func handleRequest(req events.LexEvent) (events.LexEvent, error) {
@@ -146,6 +147,7 @@ func handleRequest(req events.LexEvent) (events.LexEvent, error) {
 		} else if req.CurrentIntent.Slots["phone"] != "null" {
 			content = "You’re all set. Expect my recommendations shortly! Have a good day."
 			data = append(data, req.CurrentIntent.Slots["phone"])
+			SQS(data)
 		}
 		dialogAction := events.LexEvent{
 			DialogAction: &events.LexDialogAction{
@@ -157,7 +159,6 @@ func handleRequest(req events.LexEvent) (events.LexEvent, error) {
 				},
 			},
 		}
-		SQS(data)
 		json.Marshal(dialogAction)
 		return dialogAction, nil
 	} else {
