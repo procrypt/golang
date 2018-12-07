@@ -65,13 +65,13 @@ func elasticSearch(query string) []string {
 
 func lexSearch(req events.LexEvent) (events.LexEvent, error) {
 	utterances := []string{"Tree", "Road", "Bird", "Human", "Town", "Downtown", "Asphalt", "Plant"}
-	content := " "
+	attachments := []events.Attachment{}
 	if req.CurrentIntent.Name == "Training" {
 		for _, v := range utterances {
 			if req.InputTranscript == v {
 				result := elasticSearch(req.InputTranscript)
 				for _, v := range result {
-					content += " " + v
+					attachments = append(attachments, events.Attachment{ImageURL: "" + v})
 				}
 				dailogAction := events.LexEvent{
 					DialogAction: &events.LexDialogAction{
@@ -79,10 +79,16 @@ func lexSearch(req events.LexEvent) (events.LexEvent, error) {
 						FulfillmentState: "Fulfilled",
 						Message: map[string]string{
 							"contentType": "PlainText",
-							"content":     content,
+							"content":     "Result",
+						},
+						ResponseCard: &events.LexResponseCard{
+							Version:            1,
+							ContentType:        "application/vnd.amazonaws.card.generic",
+							GenericAttachments: attachments,
 						},
 					},
 				}
+
 				json.Marshal(dailogAction)
 				return dailogAction, nil
 			}
