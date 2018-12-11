@@ -37,62 +37,63 @@ type Result struct {
 	} `json:"hits"`
 }
 
-func elasticSearch(query string) []string {
+func elasticSearch(query []string) []string {
 	data := []string{}
 	r := Result{}
-	req, err := http.NewRequest("GET", ""+query, nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	bs, _ := ioutil.ReadAll(resp.Body)
-	json.Unmarshal([]byte(bs), &r)
-	if len(r.Hits.Hits) != 0 {
-		for _, v := range r.Hits.Hits {
-			data = append(data, v.Source.ObjectKey)
+	for _, v := range query {
+		req, err := http.NewRequest("GET", "<elasticSearchURL>"+v, nil)
+		if err != nil {
+			fmt.Println(err)
 		}
-	} else {
-		return data
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println(err)
+		}
+		bs, _ := ioutil.ReadAll(resp.Body)
+		json.Unmarshal([]byte(bs), &r)
+		fmt.Println(string(bs))
+		if len(r.Hits.Hits) != 0 {
+			for _, v := range r.Hits.Hits {
+				data = append(data, v.Source.ObjectKey)
+			}
+		}
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
 	return data
 }
 
 func lexSearch(req events.LexEvent) (events.LexEvent, error) {
-	utterances := []string{"Tree", "Road", "Bird", "Human", "Town", "Downtown", "Asphalt", "Plant"}
+	result := []string{}
 	attachments := []events.Attachment{}
-	if req.CurrentIntent.Name == "Training" {
-		for _, v := range utterances {
-			if req.InputTranscript == v {
-				result := elasticSearch(req.InputTranscript)
-				for _, v := range result {
-					attachments = append(attachments, events.Attachment{ImageURL: "" + v})
-				}
-				dailogAction := events.LexEvent{
-					DialogAction: &events.LexDialogAction{
-						Type:             "Close",
-						FulfillmentState: "Fulfilled",
-						Message: map[string]string{
-							"contentType": "PlainText",
-							"content":     "Result",
-						},
-						ResponseCard: &events.LexResponseCard{
-							Version:            1,
-							ContentType:        "application/vnd.amazonaws.card.generic",
-							GenericAttachments: attachments,
-						},
-					},
-				}
-
-				json.Marshal(dailogAction)
-				return dailogAction, nil
-			}
+	if req.CurrentIntent.Name == "ProcryptPics" {
+		if req.InputTranscript == "show me birds" || req.InputTranscript == "birds" {
+			result = elasticSearch([]string{"Bird"})
+		} else if req.InputTranscript == "show me cats" || req.InputTranscript == "cats" {
+			result = elasticSearch([]string{"Cat"})
+		} else if req.InputTranscript == "show me cats and dogs" || req.InputTranscript == "show me dogs and cats" {
+			result = elasticSearch([]string{"Cat", "Dog"})
 		}
+		for _, v := range result {
+			attachments = append(attachments, events.Attachment{ImageURL: "<s3 bucket url>" + v})
+		}
+		dailogAction := events.LexEvent{
+			DialogAction: &events.LexDialogAction{
+				Type:             "Close",
+				FulfillmentState: "Fulfilled",
+				Message: map[string]string{
+					"contentType": "PlainText",
+					"content":     "Result",
+				},
+				ResponseCard: &events.LexResponseCard{
+					Version:            1,
+					ContentType:        "application/vnd.amazonaws.card.generic",
+					GenericAttachments: attachments,
+				},
+			},
+		}
+		return dailogAction, nil
 	}
 	dailogAction := events.LexEvent{
 		DialogAction: &events.LexDialogAction{
@@ -104,7 +105,6 @@ func lexSearch(req events.LexEvent) (events.LexEvent, error) {
 			},
 		},
 	}
-	json.Marshal(dailogAction)
 	return dailogAction, nil
 }
 
