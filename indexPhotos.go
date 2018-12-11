@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -28,7 +29,7 @@ func elasticSearchIndex(p *Payload) {
 		fmt.Println(err)
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", "", body)
+	req, err := http.NewRequest("POST", "<ElasticSearchVPC URL>", body)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -38,6 +39,8 @@ func elasticSearchIndex(p *Payload) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	bs, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(bs))
 	defer resp.Body.Close()
 }
 
